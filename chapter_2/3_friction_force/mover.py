@@ -9,7 +9,6 @@ def normalise_vector(vector):
     Args:
         vector (numpy.ndarray): A numpy vector
     """
-
     return vector/np.linalg.norm(vector)
 
 
@@ -43,23 +42,6 @@ class Mover(pyglet.shapes.Circle):
         self.opacity = 200
         self.canvas_w, self.canvas_h = canvas_size
 
-    def friction(self):
-        """Apply a friction force to the Mover
-        """
-        diff = self.pos[1] - self.radius
-        if diff < 1:
-            # print('Friction')
-
-            # Direction of friction
-            friction = np.copy(self.velocity)
-            friction = -1 * normalise_vector(friction)
-
-            # Magnitude of friction
-            mu = 0.2
-            normal = self.mass
-            friction = set_magnitude(vector=friction, mag=mu*normal)
-            self.apply_force(friction)
-
     def apply_force(self, force):
         """Apply a force to the mover. 
 
@@ -74,6 +56,23 @@ class Mover(pyglet.shapes.Circle):
         f = force / self.mass
         self.acceleration += f
 
+    def friction(self):
+        """Apply a friction force to the Mover
+        """
+        diff = self.pos[1] - self.radius
+        if diff < 1 and np.any(self.velocity):
+            # print('Friction')
+
+            # Direction of friction
+            friction = np.copy(self.velocity)
+            friction = -1 * normalise_vector(friction)
+
+            # Magnitude of friction
+            mu = 0.2
+            normal = self.mass
+            friction = set_magnitude(vector=friction, mag=mu*normal)
+            self.apply_force(friction)
+
     def update(self, dt):
         """Updates the mover position on the canvas
 
@@ -82,11 +81,11 @@ class Mover(pyglet.shapes.Circle):
                         Typically obtained from  pyglet.clock.schedule_interval()
         """
 
-        self.acceleration *= dt
         self.velocity += self.acceleration
-        self.pos += self.velocity
+        self.pos += self.velocity * dt
         self.x = self.pos[0]
         self.y = self.pos[1]
+        self.acceleration = np.array([0., 0.])
 
     def check_edges(self):
         """Keeps the mover inside the canvas

@@ -1,5 +1,6 @@
 import pyglet
 import numpy as np
+from math import sqrt
 
 
 class Mover(pyglet.shapes.Circle):
@@ -9,10 +10,10 @@ class Mover(pyglet.shapes.Circle):
         pyglet (): Inherits attributes from pyglet shapes.circle
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, mass, *args, **kwargs, ):
+        super().__init__(radius=sqrt(mass)*10, *args, **kwargs)
 
-        self.mass = 1
+        self.mass = mass
         self.pos = np.array([float(self.x), float(self.y)])
         self.velocity = np.array([0., 0.])
         self.acceleration = np.array([0., 0.])
@@ -39,28 +40,31 @@ class Mover(pyglet.shapes.Circle):
                         Typically obtained from  pyglet.clock.schedule_interval()
         """
 
-        self.acceleration *= dt
         self.velocity += self.acceleration
-        self.pos += self.velocity
+        self.pos += self.velocity * dt
         self.x = self.pos[0]
         self.y = self.pos[1]
+        self.acceleration = np.array([0., 0.])
 
-    def check_edges(self):
+    def check_edges(self, canvas_w, canvas_h):
         """Keeps the mover inside the canvas
+
+        Args:
+            canvas_w (int): Width of the screen in pixels
+            canvas_h (int): Height of the screen in pixels
         """
-        # Warning: For this example the size of the canvas has been "hard-coded" to 400x400
         # Checking position on canvas at the x axis
         if self.pos[0] <= self.radius:
-            self.pos[0] =  self.radius
+            self.pos[0] = self.radius
             self.velocity[0] *= -1
-        elif self.pos[0] >= 400 - self.radius:
-            self.pos[0] = 400 - self.radius
+        elif self.pos[0] >= canvas_w - self.radius:
+            self.pos[0] = canvas_w - self.radius
             self.velocity[0] *= -1
 
         # Checking position at the y axis
         if self.pos[1] <= self.radius:
             self.pos[1] = self.radius
             self.velocity[1] *= -1
-        elif self.pos[1] >= 400 - self.radius:
-            self.pos[1] = 400 - self.radius
+        elif self.pos[1] >= canvas_h - self.radius:
+            self.pos[1] = canvas_h - self.radius
             self.velocity[1] *= -1

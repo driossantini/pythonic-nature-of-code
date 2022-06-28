@@ -41,5 +41,5 @@ def on_draw():
 
 
 if __name__ == "__main__":
-    pyglet.clock.schedule_interval(canvas_update, 1/240.0)
+    pyglet.clock.schedule_interval(canvas_update, 1/120.0)
     pyglet.app.run()
