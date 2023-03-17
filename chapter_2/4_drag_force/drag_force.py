@@ -1,8 +1,8 @@
 import pyglet
 from pyglet.window import mouse
-import numpy as np
 from mover import Mover
 from random import randint
+from pyglet.math import Vec2
 
 
 def mover_list(num, batch):
@@ -18,7 +18,7 @@ def mover_list(num, batch):
     movers = []
     for _ in range(num):
         new_mover = Mover(x=randint(1, canvas.width), y=300,
-                          mass=randint(1, 10),
+                          mass=randint(3, 10),
                           canvas_size=canvas.get_size(),
                           batch=batch)
         movers.append(new_mover)
@@ -48,24 +48,24 @@ def canvas_update(dt):
     Args:
         dt (float): frame rate
     """
-    gravity = np.array([0, -10])
+    gravity = Vec2(0, -10)
 
     for mover in movers:
         weigth = gravity * mover.mass
         mover.apply_force(weigth)
         mover.friction(mu=0.2)
 
-        # Apply drag only on bottom half of canvas
-        if mover.pos[1] < canvas.height/2:
-            mover.drag(c=0.003)
-
         # Apply wind force and directon depending if left/right button of mouse is pressed
         if mouse_buttons[mouse.LEFT]:
-            wind = np.array([-4, 0])
+            wind = Vec2(-4, 0)
             mover.apply_force(wind)
         elif mouse_buttons[mouse.RIGHT]:
-            wind = np.array([4, 0])
+            wind = Vec2(4, 0)
             mover.apply_force(wind)
+
+        # Apply drag only on bottom half of canvas
+        if mover.pos.y < canvas.height/2:
+            mover.drag(c=0.003)
 
         mover.check_edges()
         mover.update(dt)
